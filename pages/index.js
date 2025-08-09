@@ -1,52 +1,118 @@
 import { useState } from "react";
 
 export default function Home() {
-  const [input, setInput] = useState("");
-  const [output, setOutput] = useState("");
+  const [inputText, setInputText] = useState("");
+  const [outputCommand, setOutputCommand] = useState("");
+  const [interfaceName, setInterfaceName] = useState("");
 
-  const handleGenerate = () => {
-    // Парсим введённые строки
-    const lines = input.split("\n");
+  function parseInput(text) {
+    const lines = text.split("\n");
     const values = {};
-    lines.forEach(line => {
-      const match = line.match(/(\w+)\s*=\s*(\d+)/);
-      if (match) {
-        values[match[1].toLowerCase()] = match[2];
+    for (const line of lines) {
+      const parts = line.split("=");
+      if (parts.length === 2) {
+        const key = parts[0].trim().toLowerCase();
+        const value = parts[1].trim();
+        values[key] = value;
       }
-    });
+    }
+    return values;
+  }
 
-    // Формируем команду с подстановкой значений
-    const command = `interface {name} wireguard asc ${values.jc || ""} ${values.jmin || ""} ${values.jmax || ""} ${values.s1 || ""} ${values.s2 || ""} ${values.h1 || ""} ${values.h2 || ""} ${values.h3 || ""} ${values.h4 || ""}`;
+  function generateCommand() {
+    const vals = parseInput(inputText);
 
-    setOutput(command);
-  };
+    if (!interfaceName) {
+      alert("Please enter interface name");
+      return;
+    }
+
+    const requiredKeys = [
+      "jc",
+      "jmin",
+      "jmax",
+      "s1",
+      "s2",
+      "h1",
+      "h2",
+      "h3",
+      "h4",
+    ];
+
+    for (const key of requiredKeys) {
+      if (!vals[key]) {
+        alert(`Missing value for ${key.toUpperCase()}`);
+        return;
+      }
+    }
+
+    const cmd = `interface ${interfaceName} wireguard asc ${vals.jc} ${vals.jmin} ${vals.jmax} ${vals.s1} ${vals.s2} ${vals.h1} ${vals.h2} ${vals.h3} ${vals.h4}`;
+
+    setOutputCommand(cmd);
+  }
 
   return (
-    <div style={styles.container}>
-      <h1 style={styles.title}>Генератор команд для WireGuard</h1>
-      <p style={styles.description}>
-        Введите значения в формате <code>Jc = 43</code>, <code>Jmin = 50</code> и т.д., по одному на строку.
-      </p>
-      <textarea
-        style={styles.textarea}
-        rows={10}
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-        placeholder={`Jc = 43\nJmin = 50\nJmax = 70\nS1 = 110\nS2 = 120\nH1 = 1593635057\nH2 = 430880481\nH3 = 1214405368\nH4 = 1739253821`}
-      />
-      <button style={styles.button} onClick={handleGenerate}>
-        Сгенерировать команду
+    <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
+      <h1>WireGuard - создание команды для роутера</h1>
+
+      <label>
+        Имя интерфейса:<br />
+        <input
+          type="text"
+          value={interfaceName}
+          onChange={(e) => setInterfaceName(e.target.value)}
+          placeholder="Enter interface name"
+          style={{ width: "100%", padding: 8, marginBottom: 16 }}
+        />
+      </label>
+
+      <label>
+        Введите значения</code>):<br />
+        <textarea
+          rows={10}
+          value={inputText}
+          onChange={(e) => setInputText(e.target.value)}
+          placeholder={`Jc = 43
+Jmin = 50
+Jmax = 70
+S1 = 110
+S2 = 120
+H1 = 1593635057
+H2 = 430880481
+H3 = 1214405368
+H4 = 1739253821`}
+          style={{ width: "100%", padding: 8 }}
+        />
+      </label>
+
+      <button
+        onClick={generateCommand}
+        style={{
+          marginTop: 12,
+          padding: "10px 20px",
+          fontSize: 16,
+          cursor: "pointer",
+        }}
+      >
+        Generate Command
       </button>
 
-      {output && (
-        <pre style={styles.output}>
-          {output}
+      {outputCommand && (
+        <pre
+          style={{
+            background: "#eee",
+            padding: 12,
+            marginTop: 20,
+            whiteSpace: "pre-wrap",
+            wordWrap: "break-word",
+          }}
+        >
+          {outputCommand}
         </pre>
       )}
     </div>
   );
 }
-
 const styles = {
   container: {
     maxWidth: 600,
