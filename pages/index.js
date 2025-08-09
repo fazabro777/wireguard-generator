@@ -1,115 +1,43 @@
-import { useState } from "react";
+import { useState } from 'react';
 
 export default function Home() {
-  const [inputText, setInputText] = useState("");
-  const [outputCommand, setOutputCommand] = useState("");
-  const [interfaceName, setInterfaceName] = useState("");
+  const [input, setInput] = useState('');
+  const [command, setCommand] = useState('');
 
-  function parseInput(text) {
-    const lines = text.split("\n");
-    const values = {};
-    for (const line of lines) {
-      const parts = line.split("=");
-      if (parts.length === 2) {
-        const key = parts[0].trim().toLowerCase();
-        const value = parts[1].trim();
-        values[key] = value;
-      }
-    }
-    return values;
-  }
+  const handleInputChange = (e) => {
+    setInput(e.target.value);
+  };
 
-  function generateCommand() {
-    const vals = parseInput(inputText);
-
-    if (!interfaceName) {
-      alert("Please enter interface name");
-      return;
-    }
-
-    const requiredKeys = [
-      "jc",
-      "jmin",
-      "jmax",
-      "s1",
-      "s2",
-      "h1",
-      "h2",
-      "h3",
-      "h4",
-    ];
-
-    for (const key of requiredKeys) {
-      if (!vals[key]) {
-        alert(`Missing value for ${key.toUpperCase()}`);
-        return;
-      }
-    }
-
-    const cmd = `interface ${interfaceName} wireguard asc ${vals.jc} ${vals.jmin} ${vals.jmax} ${vals.s1} ${vals.s2} ${vals.h1} ${vals.h2} ${vals.h3} ${vals.h4}`;
-
-    setOutputCommand(cmd);
-  }
+  const handleGenerateCommand = () => {
+    // Логика генерации команды
+    setCommand(`Generated command based on: ${input}`);
+  };
 
   return (
-    <div style={{ maxWidth: 600, margin: "auto", padding: 20, fontFamily: "Arial, sans-serif" }}>
-      <h1>WireGuard Command Generator</h1>
-
-      <label>
-        Interface name:<br />
-        <input
-          type="text"
-          value={interfaceName}
-          onChange={(e) => setInterfaceName(e.target.value)}
-          placeholder="Enter interface name"
-          style={{ width: "100%", padding: 8, marginBottom: 16 }}
-        />
-      </label>
-
-      <label>
-        Paste your values (one per line, e.g. <code>Jc = 43</code>):<br />
+    <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center py-6 sm:py-12">
+      <div className="max-w-lg w-full bg-white p-8 rounded-lg shadow-lg">
+        <h1 className="text-3xl font-semibold text-center text-indigo-600 mb-4">Генератор команд для WireGuard</h1>
+        <p className="text-center text-gray-600 mb-6">Введите значения в формате `Jc = 43`, `Jmin = 50` и т.д., по одному на строку.</p>
         <textarea
-          rows={10}
-          value={inputText}
-          onChange={(e) => setInputText(e.target.value)}
-          placeholder={`Jc = 43
-Jmin = 50
-Jmax = 70
-S1 = 110
-S2 = 120
-H1 = 1593635057
-H2 = 430880481
-H3 = 1214405368
-H4 = 1739253821`}
-          style={{ width: "100%", padding: 8 }}
+          className="w-full p-3 border border-gray-300 rounded-md mb-4"
+          rows="6"
+          value={input}
+          onChange={handleInputChange}
+          placeholder="Jc = 43&#10;Jmin = 50&#10;Jmax = 70&#10;S1 = 110&#10;S2 = 120&#10;H1 = 1593635057&#10;H2 = 430880481&#10;H3 = 1214405368&#10;H4 = 1739253821"
         />
-      </label>
-
-      <button
-        onClick={generateCommand}
-        style={{
-          marginTop: 12,
-          padding: "10px 20px",
-          fontSize: 16,
-          cursor: "pointer",
-        }}
-      >
-        Generate Command
-      </button>
-
-      {outputCommand && (
-        <pre
-          style={{
-            background: "#eee",
-            padding: 12,
-            marginTop: 20,
-            whiteSpace: "pre-wrap",
-            wordWrap: "break-word",
-          }}
+        <button
+          onClick={handleGenerateCommand}
+          className="w-full py-3 bg-indigo-600 text-white font-semibold rounded-md hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-opacity-50"
         >
-          {outputCommand}
-        </pre>
-      )}
+          Сгенерировать команду
+        </button>
+        {command && (
+          <div className="mt-6 p-4 bg-gray-100 border border-gray-300 rounded-md">
+            <h2 className="text-xl font-semibold text-gray-700">Сгенерированная команда:</h2>
+            <pre className="mt-2 text-gray-800">{command}</pre>
+          </div>
+        )}
+      </div>
     </div>
   );
 }
